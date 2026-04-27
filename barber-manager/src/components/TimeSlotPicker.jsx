@@ -1,45 +1,58 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Clock } from 'lucide-react'
 import api from '../api/axios'
 
-/**
- * TimeSlotPicker
- * Props:
- *   date      — string YYYY-MM-DD
- *   barberId  — string | number
- *   value     — horário selecionado ("14:30" | "")
- *   onChange  — (horario: string) => void
- *   variant   — "public" | "admin"
- */
 export default function TimeSlotPicker({ date, barberId, value, onChange, variant = 'public' }) {
   const [slots, setSlots]     = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(null)
 
-  // Estabiliza a referência de onChange para não causar loop no useEffect
-  const stableOnChange = useCallback((v) => onChange(v), [onChange])
+  // Ref para sempre ter a versão mais recente de onChange
+  // sem colocá-la nas deps do useEffect (evita loop infinito)
+  const onChangeRef = useRef(onChange)
+  useEffect(() => { onChangeRef.current = onChange })
 
   useEffect(() => {
-    if (!date || !barberId) { setSlots([]); return }
+    if (!date || !barberId) {
+      setSlots([])
+      setLoading(false)
+      setError(null)
+      return
+    }
 
     let cancelled = false
     setLoading(true)
     setError(null)
-    stableOnChange('')
+
+    // Limpa seleção anterior sem causar re-render que dispara o effect de novo
+    onChangeRef.current('')
 
     api.get('/horarios', { params: { data: date, barbeiro: barberId } })
-      .then(res => { if (!cancelled) setSlots(Array.isArray(res.data) ? res.data : []) })
-      .catch(() => {
-        if (!cancelled) {
-          setError('Não foi possível carregar os horários.')
+      .then(res => {
+        if (cancelled) return
+        const data = res.data
+        // Aceita tanto array de strings ["09:00"] quanto array de objetos [{horario:"09:00"}]
+        if (Array.isArray(data)) {
+          setSlots(
+            typeof data[0] === 'string'
+              ? data
+              : data.map(d => d.horario ?? d.time ?? d.hora ?? String(d))
+          )
+        } else {
           setSlots([])
         }
+      })
+      .catch(err => {
+        if (cancelled) return
+        console.error('[TimeSlotPicker] erro ao buscar horários:', err)
+        setError('Não foi possível carregar os horários.')
+        setSlots([])
       })
       .finally(() => { if (!cancelled) setLoading(false) })
 
     return () => { cancelled = true }
-  }, [date, barberId, stableOnChange])
+  }, [date, barberId]) // onChange intencionalmente fora das deps — usamos ref
 
   const isAdmin = variant === 'admin'
 
@@ -87,7 +100,7 @@ export default function TimeSlotPicker({ date, barberId, value, onChange, varian
               <motion.button
                 key={slot}
                 type="button"
-                onClick={() => stableOnChange(slot)}
+                onClick={() => onChangeRef.current(slot)}
                 whileTap={{ scale: 0.93 }}
                 aria-pressed={selected}
                 aria-label={`Horário ${slot}${selected ? ', selecionado' : ''}`}
