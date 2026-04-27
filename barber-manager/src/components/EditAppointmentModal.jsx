@@ -47,7 +47,7 @@ export default function EditAppointmentModal({ appointment, onClose, onUpdated }
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 16 }}
         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-        className="bg-[#0f2a35] border border-[var(--teal)]/20 rounded-2xl w-full max-w-md p-6 shadow-2xl"
+        className="bg-[#0f2a35] border border-[var(--teal)]/20 rounded-2xl w-full max-w-md p-5 sm:p-6 shadow-2xl modal-scroll"
       >
         <div className="flex items-center justify-between mb-6">
           <div>

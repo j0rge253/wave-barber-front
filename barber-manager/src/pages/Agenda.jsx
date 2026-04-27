@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { CalendarDays, Plus, ChevronLeft, ChevronRight, Scissors, Clock, User, Pencil, Trash2 } from 'lucide-react'
+import { useEffect, useState, useCallback } from 'react'
+import { CalendarDays, Plus, ChevronLeft, ChevronRight, Scissors, User, Pencil, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import Navbar from '../components/Navbar'
@@ -55,7 +55,7 @@ export default function Agenda() {
     })
   }, [])
 
-  const fetchData = () => {
+  const fetchData = useCallback(() => {
     setLoading(true)
     const date = formatDate(selectedDate)
     Promise.all([
@@ -67,7 +67,7 @@ export default function Agenda() {
       setAppointments(Array.isArray(apptRes.data) ? apptRes.data : [])
       setSlots(Array.isArray(slotsRes.data) ? slotsRes.data : [])
     }).finally(() => setLoading(false))
-  }
+  }, [selectedDate, selectedBarber])
 
   useEffect(() => { fetchData() }, [selectedDate, selectedBarber])
 
@@ -95,7 +95,7 @@ export default function Agenda() {
   return (
     <div className="min-h-screen admin-bg">
       <Navbar />
-      <main className="max-w-3xl mx-auto px-6 py-8">
+      <main className="max-w-3xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -118,8 +118,8 @@ export default function Agenda() {
             className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-all duration-200">
             <ChevronLeft size={20} />
           </button>
-          <div className="text-center">
-            <p className="text-[var(--white-s)] font-semibold capitalize text-sm">{displayDate(selectedDate)}</p>
+          <div className="text-center min-w-0 px-2">
+            <p className="text-[var(--white-s)] font-semibold capitalize text-xs sm:text-sm leading-snug">{displayDate(selectedDate)}</p>
             {!isToday
               ? <button onClick={() => setSelectedDate(new Date())} className="text-[var(--teal-l)] hover:text-[var(--teal)] text-xs mt-1 transition-colors">Ir para hoje</button>
               : <p className="text-green-400 text-xs mt-1">Hoje</p>
@@ -166,8 +166,8 @@ export default function Agenda() {
               exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
               className="flex flex-col gap-2">
               {grid.map(({ time, appointment }) => (
-                <li key={time}
-                  className={`flex items-center gap-4 rounded-2xl px-5 py-3.5 border transition-all duration-200 ${
+                <li key={`${time}-${appointment?.id ?? 'free'}`}
+                  className={`flex items-center gap-2 sm:gap-4 rounded-2xl px-3 sm:px-5 py-3 border transition-all duration-200 ${
                     appointment
                       ? 'bg-[#1a3a4a]/70 border-[var(--teal)]/25 hover:border-[var(--teal)]/45'
                       : 'bg-white/3 border-white/6 opacity-60'
@@ -199,16 +199,16 @@ export default function Agenda() {
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <button
                           onClick={() => setEditTarget({ ...appointment, date: formatDate(selectedDate) })}
-                          className="p-1.5 rounded-lg text-white/30 hover:text-[var(--teal-l)] hover:bg-[var(--teal)]/10 transition-all duration-200"
-                          title="Editar horário">
-                          <Pencil size={14} />
+                          className="p-2 rounded-lg text-white/30 hover:text-[var(--teal-l)] hover:bg-[var(--teal)]/10 transition-all duration-200"
+                          aria-label={`Editar agendamento de ${appointment.clientName}`}>
+                          <Pencil size={14} aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => handleDelete(appointment.id)}
                           disabled={deletingId === appointment.id}
-                          className="p-1.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 disabled:opacity-40"
-                          title="Excluir agendamento">
-                          <Trash2 size={14} />
+                          className="p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 disabled:opacity-40"
+                          aria-label={`Excluir agendamento de ${appointment.clientName}`}>
+                          <Trash2 size={14} aria-hidden="true" />
                         </button>
                       </div>
                     </div>

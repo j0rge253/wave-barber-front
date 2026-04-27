@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { DollarSign, Scissors, User, CalendarDays, TrendingUp } from 'lucide-react'
+import { DollarSign, Scissors, User, TrendingUp } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import api from '../api/axios'
@@ -51,7 +51,7 @@ export default function Dashboard() {
       <Navbar />
       <main className="max-w-5xl mx-auto px-6 py-8">
         <div className="mb-8">
-          <h2 className="font-display text-3xl text-white font-bold">Dashboard</h2>
+          <h2 className="font-title text-2xl sm:text-3xl text-[var(--white-s)] font-bold tracking-wide">Dashboard</h2>
           <p className="text-white/40 text-sm mt-1">Visão geral do dia de hoje</p>
         </div>
 
@@ -81,7 +81,8 @@ export default function Dashboard() {
               Nenhum agendamento para hoje.
             </div>
           ) : (
-            <table className="w-full">
+            <div className="table-scroll">
+            <table className="w-full min-w-[480px]">
               <thead>
                 <tr className="border-b border-white/5">
                   <th className="text-left px-6 py-3 text-white/30 text-xs font-medium uppercase tracking-wide">Horário</th>
@@ -110,6 +111,7 @@ export default function Dashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
           )}
         </div>
       </main>

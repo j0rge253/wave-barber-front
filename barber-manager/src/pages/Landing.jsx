@@ -207,20 +207,24 @@ export default function Landing() {
     { href: '#agendar',    label: 'Agendar'     },
   ]
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <div className="bg-page min-h-screen">
 
       {/* ── NAVBAR ─────────────────────────────────────────── */}
       <motion.nav initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-400 ${navSolid ? 'bg-[#081820]/92 backdrop-blur-xl shadow-xl shadow-black/30 border-b border-[var(--teal)]/12' : 'bg-transparent'}`}>
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <WaveLogo size={36} />
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navSolid || mobileMenuOpen ? 'bg-[#081820]/95 backdrop-blur-xl shadow-xl shadow-black/30 border-b border-[var(--teal)]/12' : 'bg-transparent'}`}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <WaveLogo size={34} />
             <div className="leading-none">
               <span className="font-title text-[var(--white-s)] font-bold text-base block tracking-wider">WAVE</span>
               <span className="text-[var(--teal-l)] text-[9px] font-semibold tracking-[0.3em] uppercase">Barbearia</span>
             </div>
           </div>
+
+          {/* Links desktop */}
           <div className="hidden md:flex items-center gap-7 text-sm font-medium">
             {navLinks.map(({ href, label }) => {
               const id = href.replace('#','')
@@ -234,10 +238,51 @@ export default function Landing() {
               )
             })}
           </div>
-          <Link to="/admin/login" className="text-xs text-[var(--sand)]/25 hover:text-[var(--sand)]/55 transition-colors">
-            Área do Barbeiro
-          </Link>
+
+          <div className="flex items-center gap-3">
+            <Link to="/admin/login" className="hidden md:block text-xs text-[var(--sand)]/25 hover:text-[var(--sand)]/55 transition-colors">
+              Área do Barbeiro
+            </Link>
+            {/* Hamburger mobile */}
+            <button
+              onClick={() => setMobileMenuOpen(o => !o)}
+              aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={mobileMenuOpen}
+              className="md:hidden p-2 rounded-xl text-[var(--sand)]/60 hover:text-white hover:bg-white/8 transition-all duration-200"
+            >
+              {mobileMenuOpen
+                ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+              }
+            </button>
+          </div>
         </div>
+
+        {/* Menu mobile dropdown */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden border-t border-[var(--teal)]/10 overflow-hidden"
+            >
+              <div className="px-4 py-4 flex flex-col gap-1">
+                {navLinks.map(({ href, label }) => (
+                  <a key={href} href={href} onClick={() => setMobileMenuOpen(false)}
+                    className="px-4 py-3 rounded-xl text-sm font-medium text-[var(--sand)]/80 hover:text-white hover:bg-white/5 transition-all duration-200">
+                    {label}
+                  </a>
+                ))}
+                <Link to="/admin/login" onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-3 rounded-xl text-xs text-[var(--sand)]/35 hover:text-[var(--sand)]/60 transition-colors mt-1 border-t border-white/5 pt-3">
+                  Área do Barbeiro
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.nav>
 
       {/* ── HERO ───────────────────────────────────────────── */}
@@ -269,7 +314,7 @@ export default function Landing() {
 
           <motion.h1 initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.38, duration: 0.7, ease }}
-            className="font-title text-5xl md:text-[4.5rem] text-[var(--white-s)] font-black leading-[1.05] mb-5 tracking-wide">
+            className="font-title text-4xl sm:text-5xl md:text-[4.5rem] text-[var(--white-s)] font-black leading-[1.05] mb-5 tracking-wide">
             Corte fino.<br />
             <span style={{ background: 'linear-gradient(90deg,#e07a35,#c1692a)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>
               Vibe de praia.
@@ -299,7 +344,7 @@ export default function Landing() {
       </section>
 
       {/* ── SERVIÇOS ───────────────────────────────────────── */}
-      <section id="servicos" className="bg-ocean-section relative pt-4 pb-28 px-6">
+      <section id="servicos" className="bg-ocean-section relative pt-4 pb-16 sm:pb-28 px-4 sm:px-6">
         <div className="wave-divider-dark" />
         <div className="max-w-5xl mx-auto">
           <Reveal className="text-center mb-16">
@@ -309,7 +354,7 @@ export default function Landing() {
           </Reveal>
 
           <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-40px' }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {services.map(({ Icon, name, desc, price, featured }) => (
               <motion.div key={name} variants={fadeUp}
                 className={`service-card p-7 flex flex-col items-center text-center ${featured ? 'service-card-featured lg:scale-105' : ''}`}>
@@ -333,7 +378,7 @@ export default function Landing() {
       </section>
 
       {/* ── SOBRE — assimétrico ─────────────────────────────── */}
-      <section id="sobre" className="relative py-28 px-6">
+      <section id="sobre" className="relative py-16 sm:py-28 px-4 sm:px-6">
         <div className="wave-divider-ocean" />
         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <Reveal dir="left">
@@ -396,7 +441,7 @@ export default function Landing() {
       </section>
 
       {/* ── AVALIAÇÕES ─────────────────────────────────────── */}
-      <section id="avaliacoes" className="bg-ocean-section relative py-28 px-6">
+      <section id="avaliacoes" className="bg-ocean-section relative py-16 sm:py-28 px-4 sm:px-6">
         <div className="wave-divider-dark" />
         <div className="max-w-3xl mx-auto">
           <Reveal className="text-center mb-14">
@@ -409,7 +454,7 @@ export default function Landing() {
       </section>
 
       {/* ── AGENDAMENTO ────────────────────────────────────── */}
-      <section id="agendar" className="relative py-28 px-6">
+      <section id="agendar" className="relative py-16 sm:py-28 px-4 sm:px-6">
         <div className="wave-divider-ocean" />
         <div className="max-w-xl mx-auto">
           <Reveal className="text-center mb-10">
@@ -421,7 +466,7 @@ export default function Landing() {
 
           <Reveal delay={0.1}>
             <form onSubmit={handleSubmit}
-              className="bg-[#1a3a4a]/55 border border-[var(--teal)]/22 rounded-2xl p-8 flex flex-col gap-5 backdrop-blur-sm"
+              className="bg-[#1a3a4a]/55 border border-[var(--teal)]/22 rounded-2xl p-5 sm:p-8 flex flex-col gap-5 backdrop-blur-sm"
               style={{ boxShadow: '0 28px 72px rgba(8,24,32,0.55)' }}>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
